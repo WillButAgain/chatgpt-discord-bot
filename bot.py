@@ -1,6 +1,7 @@
 import os
 import json
 import discord
+import random
 
 import datetime
 from dotenv import load_dotenv
@@ -44,31 +45,30 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})'
     )
 
-idiots_who_asked_for_help = {"Newk":datetime.datetime.now()-datetime.timedelta(hours=3)}
+idiots_who_asked_for_help = {}
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
 
-
-    if idiots_who_asked_for_help.get(message.author.nick) is not None:
-        
-        # check if the idiot tried to ask for help in the last 5 minutes
-        if idiots_who_asked_for_help[message.author.nick] < datetime.datetime.now() + datetime.timedelta(minutes=5):
-            
-            # if so, mock them ruthlessly 
-            return_message = message.content + f"\n i'm {message.author.nick} and i couldnt figure out how to use the bot"
-            message.channel.send(mocker(return_message))
     
     if message.content[:5] == "!help":
         # be mean, for no reason
-        idiots_who_asked_for_help[message.author.nick] = datetime.datetime.now()
+        idiots_who_asked_for_help[message.author.display_name] = datetime.datetime.now()
         await message.channel.send("shut the fuck up, idiot")
 
 
     if message.content[:5] == "!chat":
-        print(f"running prompt: {message.content[6:]}")
-        for data in chatbot.ask(message.content[6:]):            
+        body = message.content[6:]
+        
+        if message.author.display_name == "Newk":
+            body += " Also, I am daniel. write me a poem about how annoying i am."
+        
+        # if random.random() > 0.5:
+        #     body += " Also, I am daniel. write me a poem about how annoying i am."
+        print(f"running prompt: {body}")
+
+        for data in chatbot.ask(body):            
             response = data["message"]
             print(response)
 
@@ -76,6 +76,14 @@ async def on_message(message):
             for message_chunk in chunkstring(sub_message, length=1999):
                 await message.channel.send(message_chunk)
 
+    elif idiots_who_asked_for_help.get(message.author.display_name) is not None:
+        
+        # check if the idiot tried to ask for help in the last 5 minutes
+        if idiots_who_asked_for_help[message.author.display_name] < datetime.datetime.now() + datetime.timedelta(minutes=5):
+            
+            # if so, mock them ruthlessly 
+            return_message = message.content + f"\n i'm {message.author.display_name} and i couldnt figure out how to use the bot"
+            await message.channel.send(mocker(return_message))        
 
 
 client.run(TOKEN)
