@@ -19,6 +19,9 @@ chatbot = Chatbot(config={
 
 client = discord.Client(intents=discord.Intents.all())
 
+def chunkstring(string, length):
+    return [string[0+i:length+i] for i in range(0, len(string), length)]
+
 @client.event
 async def on_ready():
     for guild in client.guilds:
@@ -39,6 +42,12 @@ async def on_message(message):
         print(f"running prompt: {message.content[6:]}")
         for data in chatbot.ask(message.content[6:]):            
             response = data["message"]
-        await message.channel.send(response)
+            print(response)
+
+        for sub_message in response.split("\n"):
+            for message_chunk in chunkstring(sub_message, length=1999):
+                await message.channel.send(message_chunk)
+
+
 
 client.run(TOKEN)
