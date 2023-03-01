@@ -2,7 +2,7 @@ import os
 import json
 import discord
 
-from datetime import datetime
+import datetime
 from dotenv import load_dotenv
 
 from revChatGPT.V1 import Chatbot
@@ -44,7 +44,7 @@ async def on_ready():
         f'{guild.name}(id: {guild.id})'
     )
 
-idiots_who_asked_for_help = {"Newk":datetime.now()}
+idiots_who_asked_for_help = {"Newk":datetime.datetime.now()-datetime.timedelta(hours=3)}
 @client.event
 async def on_message(message):
     if message.author == client.user:
@@ -54,7 +54,7 @@ async def on_message(message):
     if idiots_who_asked_for_help.get(message.author.nick) is not None:
         
         # check if the idiot tried to ask for help in the last 5 minutes
-        if idiots_who_asked_for_help[message.author.nick] < datetime.now() + datetime.timedelta(minutes=5):
+        if idiots_who_asked_for_help[message.author.nick] < datetime.datetime.now() + datetime.timedelta(minutes=5):
             
             # if so, mock them ruthlessly 
             return_message = message.content + f"\n i'm {message.author.nick} and i couldnt figure out how to use the bot"
@@ -62,7 +62,7 @@ async def on_message(message):
     
     if message.content[:5] == "!help":
         # be mean, for no reason
-        idiots_who_asked_for_help[message.author.nick] = datetime.now()
+        idiots_who_asked_for_help[message.author.nick] = datetime.datetime.now()
         await message.channel.send("shut the fuck up, idiot")
 
 
